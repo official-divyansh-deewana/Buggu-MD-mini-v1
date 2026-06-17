@@ -89,9 +89,10 @@ async function startBot() {
 
     const { state, saveCreds } = await store.getState();
 
+    // ✅ FIX: Pass auth as { state, saveCreds }
     sock = makeWASocket({
       version,
-      auth: state,
+      auth: { state, saveCreds },
       printQRInTerminal: true,
       browser: ['BUGGU-MD', 'Chrome', '120.0.0.0'],
       keepAliveIntervalMs: 60000,
@@ -222,7 +223,6 @@ async function startBot() {
 
       // ─── XP System (for non‑command messages) ─────────────
       if (!isCommand) {
-        // Add XP for all non-command messages (both private & group)
         let levelUser = await Level.findOne({ jid: senderJid });
         if (!levelUser) levelUser = new Level({ jid: senderJid });
         levelUser.xp += XP_PER_MSG;
@@ -234,7 +234,7 @@ async function startBot() {
           await sock.sendMessage(from, { text: `🎉 @${senderJid.split('@')[0]} leveled up to level ${levelUser.level}!`, mentions: [senderJid] });
         }
         await levelUser.save();
-        return; // Not a command, stop processing
+        return;
       }
 
       // ─── Command Parsing ──────────────────────────────────
