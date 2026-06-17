@@ -89,7 +89,10 @@ async function startBot() {
 
     const { state, saveCreds } = await store.getState();
 
-    // ✅ FIX: Pass auth as { state, saveCreds }
+    // ✅ SAFETY: Ensure creds and keys exist (prevent 'undefined' errors)
+    if (!state.creds) state.creds = {};
+    if (!state.keys) state.keys = {};
+
     sock = makeWASocket({
       version,
       auth: { state, saveCreds },
@@ -97,7 +100,7 @@ async function startBot() {
       browser: ['BUGGU-MD', 'Chrome', '120.0.0.0'],
       keepAliveIntervalMs: 60000,
     });
-    currentSock = sock; // Store reference for pair route
+    currentSock = sock;
 
     sock.ev.on('creds.update', saveCreds);
 
@@ -126,7 +129,6 @@ async function startBot() {
         isConnecting = false;
         await pluginHandler.loadAll(sock);
         await generateMenu(sock);
-        // Notify owner
         const ownerJid = config.ownerNumber + '@s.whatsapp.net';
         await sock.sendMessage(ownerJid, { text: `🤖 *BUGGU-MD* is online!\n📅 ${moment().format('LLLL')}` });
       }
@@ -159,14 +161,13 @@ async function startBot() {
       const from = sender;
       const senderJid = msg.key.participant || sender;
 
-      // Extract text
       let text = '';
       if (msg.message.conversation) text = msg.message.conversation;
       else if (msg.message.extendedTextMessage) text = msg.message.extendedTextMessage.text;
       else if (msg.message.imageMessage) text = msg.message.imageMessage.caption || '';
       else return;
 
-      // ─── Anti‑Link (Group Only) ──────────────────────────
+      // ─── Anti‑Link ──────────────────────────────────────────
       if (isGroup) {
         const antilinkEnabled = await getSetting(`antilink_${from}`) || false;
         if (antilinkEnabled) {
@@ -179,7 +180,7 @@ async function startBot() {
         }
       }
 
-      // ─── Anti‑Spam (Group Only) ───────────────────────────
+      // ─── Anti‑Spam ───────────────────────────────────────────
       if (isGroup) {
         const spamKey = `${from}_${senderJid}`;
         const now = Date.now();
@@ -193,9 +194,8 @@ async function startBot() {
               const antispamEnabled = await getSetting(`antispam_${from}`) || false;
               if (antispamEnabled) {
                 await sock.sendMessage(from, { text: `⚠️ @${senderJid.split('@')[0]} is spamming!`, mentions: [senderJid] });
-                // Optionally kick: await sock.groupParticipantsUpdate(from, [senderJid], 'remove');
               }
-              data.count = 0; // reset after warning
+              data.count = 0;
             }
           } else {
             data.count = 1;
@@ -204,7 +204,7 @@ async function startBot() {
         }
       }
 
-      // ─── Mute Check (Group Only) ──────────────────────────
+      // ─── Mute Check ──────────────────────────────────────────
       if (isGroup) {
         const isMuted = await getSetting(`mute_${from}_${senderJid}`) || false;
         if (isMuted) {
@@ -217,11 +217,10 @@ async function startBot() {
         }
       }
 
-      // ─── Command Processing ──────────────────────────────
       const prefix = config.prefix;
       const isCommand = text.startsWith(prefix);
 
-      // ─── XP System (for non‑command messages) ─────────────
+      // ─── XP System ─────────────────────────────────────────────
       if (!isCommand) {
         let levelUser = await Level.findOne({ jid: senderJid });
         if (!levelUser) levelUser = new Level({ jid: senderJid });
@@ -245,7 +244,6 @@ async function startBot() {
       const plugin = pluginHandler.getCommand(command);
       if (!plugin) return;
 
-      // Permissions
       const isOwner = senderJid === config.ownerNumber + '@s.whatsapp.net';
       const isGroupAdmin = isGroup ? await isUserAdmin(sock, from, senderJid) : false;
 
@@ -262,7 +260,6 @@ async function startBot() {
         return;
       }
 
-      // Cooldown (simple)
       const cooldownKey = `${command}_${senderJid}`;
       if (plugin.cooldown && plugin.cooldown > 0) {
         const last = cooldowns.get(cooldownKey);
@@ -273,12 +270,10 @@ async function startBot() {
         cooldowns.set(cooldownKey, Date.now());
       }
 
-      // React
       if (plugin.reaction) {
         await sock.sendMessage(from, { react: { text: plugin.reaction, key: msg.key } }).catch(() => {});
       }
 
-      // Execute
       try {
         await plugin.execute(sock, msg, from, senderJid, args, fullArgs, isOwner, isGroupAdmin);
         await updateStats(command);
