@@ -172,6 +172,9 @@
           statusLabel.className = 'live';
         } else {
           statusMessage.textContent = '❌ ' + (data.error || 'Failed to generate code.');
+          if (data.fallback === 'qr') {
+            statusMessage.textContent = '⚠️ Bot not ready. Please scan QR code from logs.';
+          }
         }
       } catch (err) {
         statusMessage.textContent = '❌ Error: ' + err.message;
