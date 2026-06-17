@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BUGGU-MD Pairing</title>
   <style>
-    /* Dark theme glassmorphism */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body {
       min-height: 100vh;
@@ -18,7 +17,6 @@
     .glass {
       background: rgba(255, 255, 255, 0.07);
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       border-radius: 30px;
       border: 1px solid rgba(255, 255, 255, 0.15);
       padding: 40px 30px;
@@ -28,22 +26,9 @@
       animation: fadeIn 1s ease;
     }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-    .brand {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .brand h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      background: linear-gradient(45deg, #f7971e, #ffd200);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .brand p {
-      color: #aaa;
-      font-size: 0.9rem;
-      margin-top: 5px;
-    }
+    .brand { text-align: center; margin-bottom: 30px; }
+    .brand h1 { font-size: 2.5rem; font-weight: 700; background: linear-gradient(45deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .brand p { color: #aaa; font-size: 0.9rem; margin-top: 5px; }
     .owner {
       background: rgba(255,215,0,0.1);
       border-radius: 20px;
@@ -54,15 +39,8 @@
       color: #ffd700;
       font-size: 0.9rem;
     }
-    .input-group {
-      margin-bottom: 20px;
-    }
-    .input-group label {
-      color: #ccc;
-      font-size: 0.9rem;
-      display: block;
-      margin-bottom: 6px;
-    }
+    .input-group { margin-bottom: 20px; }
+    .input-group label { color: #ccc; font-size: 0.9rem; display: block; margin-bottom: 6px; }
     .input-group input {
       width: 100%;
       padding: 14px 18px;
@@ -74,10 +52,7 @@
       outline: none;
       transition: 0.3s;
     }
-    .input-group input:focus {
-      border-color: #ffd700;
-      background: rgba(255,255,255,0.1);
-    }
+    .input-group input:focus { border-color: #ffd700; background: rgba(255,255,255,0.1); }
     .btn {
       width: 100%;
       padding: 14px;
@@ -93,17 +68,7 @@
     }
     .btn:hover { transform: scale(1.02); box-shadow: 0 8px 20px rgba(255,215,0,0.3); }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-    .status {
-      margin-top: 20px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 20px;
-      padding: 15px;
-      text-align: center;
-      color: #aaa;
-      font-size: 0.9rem;
-    }
-    .status .live { color: #4caf50; font-weight: 600; }
-    .status .offline { color: #f44336; font-weight: 600; }
+    .status { margin-top: 20px; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 15px; text-align: center; color: #aaa; font-size: 0.9rem; }
     .code-box {
       background: rgba(0,0,0,0.4);
       border-radius: 20px;
@@ -113,12 +78,7 @@
       border: 1px dashed rgba(255,215,0,0.4);
       display: none;
     }
-    .code-box .code {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #ffd700;
-      letter-spacing: 4px;
-    }
+    .code-box .code { font-size: 2rem; font-weight: 700; color: #ffd700; letter-spacing: 4px; }
     .code-box .copy-btn {
       background: rgba(255,215,0,0.2);
       border: none;
@@ -130,14 +90,7 @@
       transition: 0.3s;
     }
     .code-box .copy-btn:hover { background: rgba(255,215,0,0.4); }
-    .footer {
-      margin-top: 25px;
-      text-align: center;
-      color: #555;
-      font-size: 0.8rem;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      padding-top: 15px;
-    }
+    .footer { margin-top: 25px; text-align: center; color: #555; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
     .footer a { color: #ffd700; text-decoration: none; }
     .loader {
       display: inline-block;
@@ -151,7 +104,6 @@
       vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .status-text { margin-top: 10px; font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -191,14 +143,10 @@
     const usersCount = document.getElementById('usersCount');
     const statusMessage = document.getElementById('statusMessage');
 
-    // Simulate live status
-    let isLive = true;
     setInterval(() => {
-      // Random users count
       usersCount.textContent = Math.floor(Math.random() * 20) + 1;
     }, 5000);
 
-    // Pair code generation (simulated for demo, in production this would call the backend API)
     pairBtn.addEventListener('click', async () => {
       const phone = phoneInput.value.trim();
       if (!phone) {
@@ -209,19 +157,24 @@
       pairBtn.innerHTML = '<span class="loader"></span> Generating...';
       statusMessage.textContent = '⏳ Generating pair code...';
 
-      // Simulate API call to /pair/generate
       try {
-        // In production, this would be: fetch('/pair/generate', { method: 'POST', body: JSON.stringify({ phone }), headers: { 'Content-Type': 'application/json' } })
-        // For demo, we simulate a 2-second delay and return a random code.
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
-        pairCode.textContent = code;
-        codeContainer.style.display = 'block';
-        statusMessage.textContent = '✅ Pair code generated! Copy it and use in WhatsApp.';
-        statusLabel.textContent = 'Live';
-        statusLabel.className = 'live';
+        const response = await fetch('/pair/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone })
+        });
+        const data = await response.json();
+        if (response.ok && data.code) {
+          pairCode.textContent = data.code;
+          codeContainer.style.display = 'block';
+          statusMessage.textContent = '✅ Pair code generated! Copy it and use in WhatsApp.';
+          statusLabel.textContent = 'Live';
+          statusLabel.className = 'live';
+        } else {
+          statusMessage.textContent = '❌ ' + (data.error || 'Failed to generate code.');
+        }
       } catch (err) {
-        statusMessage.textContent = '❌ Error generating code.';
+        statusMessage.textContent = '❌ Error: ' + err.message;
       } finally {
         pairBtn.disabled = false;
         pairBtn.innerHTML = '🔑 Generate Pair Code';
@@ -234,7 +187,6 @@
         navigator.clipboard.writeText(code).then(() => {
           alert('✅ Code copied!');
         }).catch(() => {
-          // Fallback
           const textArea = document.createElement('textarea');
           textArea.value = code;
           document.body.appendChild(textArea);
@@ -245,11 +197,6 @@
         });
       }
     });
-
-    // Auto-refresh status every 30s (simulate)
-    setInterval(() => {
-      // Just to show activity
-    }, 30000);
   </script>
 </body>
 </html>
