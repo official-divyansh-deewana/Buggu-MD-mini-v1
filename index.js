@@ -1,6 +1,9 @@
+// ─────────────────────────────────────────────────────────────
+// BUGGU‑MD — Complete WhatsApp Bot (FINAL WORKING)
+// ─────────────────────────────────────────────────────────────
+
 const { makeWASocket, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const { MongoStore } = require('./lib/sessionStore');
-const { setSock, getSock } = require('./lib/socketState');
 const database = require('./lib/database');
 const pluginHandler = require('./lib/pluginHandler');
 const { generateMenu } = require('./lib/menu');
@@ -15,7 +18,10 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'uploads')));
-app.use('/pair', require('./pair/index'));
+
+// ─── PAIR ROUTE ─────────────────────────────────────────────
+const pairRouter = require('./pair/index');
+app.use('/pair', pairRouter);
 
 app.get('/health', (req, res) => res.send('OK'));
 app.get('/keep-alive', (req, res) => res.send('Alive'));
@@ -29,7 +35,7 @@ process.on('uncaughtException', (err) => {
   console.error('❌ Uncaught Exception:', err);
   if (sock) sock.end();
 });
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason) => {
   console.error('❌ Unhandled Rejection:', reason);
 });
 
@@ -89,7 +95,6 @@ async function startBot() {
       browser: ['BUGGU-MD', 'Chrome', '120.0.0.0'],
       keepAliveIntervalMs: 60000,
     });
-    setSock(sock);  // Store reference for pair route
 
     sock.ev.on('creds.update', saveCreds);
 
@@ -105,11 +110,9 @@ async function startBot() {
         const shouldReconnect = (statusCode !== DisconnectReason.loggedOut);
         console.log(`🔌 Connection closed (${statusCode}), reconnecting: ${shouldReconnect}`);
         if (shouldReconnect) {
-          setSock(null);
           isConnecting = false;
           setTimeout(startBot, 5000);
         } else {
-          setSock(null);
           console.log('❌ Logged out, stopping bot.');
           process.exit(0);
         }
@@ -281,6 +284,9 @@ async function startBot() {
 
 // ─── Start ──────────────────────────────────────────────────
 startBot();
+
+// ─── EXPORT SOCK DIRECTLY ───────────────────────────────────
+module.exports.sock = sock;
 
 // ─── Anti‑Sleep / Keep‑Alive ──────────────────────────────
 setInterval(() => {
