@@ -1,9 +1,6 @@
-// ─────────────────────────────────────────────────────────────
-// BUGGU‑MD — Complete WhatsApp Bot (Stable)
-// ─────────────────────────────────────────────────────────────
-
 const { makeWASocket, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const { MongoStore } = require('./lib/sessionStore');
+const { setSock, getSock } = require('./lib/socketState');
 const database = require('./lib/database');
 const pluginHandler = require('./lib/pluginHandler');
 const { generateMenu } = require('./lib/menu');
@@ -50,7 +47,6 @@ process.on('unhandledRejection', (reason, promise) => {
 // ─── Bot State ──────────────────────────────────────────────
 let sock = null;
 let isConnecting = false;
-let currentSock = null;
 
 // ─── Spam & Cooldown ──────────────────────────────────────
 const spamTracker = new Map();
@@ -93,7 +89,7 @@ async function startBot() {
       browser: ['BUGGU-MD', 'Chrome', '120.0.0.0'],
       keepAliveIntervalMs: 60000,
     });
-    currentSock = sock;
+    setSock(sock);  // Store reference for pair route
 
     sock.ev.on('creds.update', saveCreds);
 
@@ -109,11 +105,11 @@ async function startBot() {
         const shouldReconnect = (statusCode !== DisconnectReason.loggedOut);
         console.log(`🔌 Connection closed (${statusCode}), reconnecting: ${shouldReconnect}`);
         if (shouldReconnect) {
-          currentSock = null;
+          setSock(null);
           isConnecting = false;
           setTimeout(startBot, 5000);
         } else {
-          currentSock = null;
+          setSock(null);
           console.log('❌ Logged out, stopping bot.');
           process.exit(0);
         }
@@ -286,11 +282,6 @@ async function startBot() {
 // ─── Start ──────────────────────────────────────────────────
 startBot();
 
-// ─── Export socket getter for pair route ───────────────────
-function getSock() {
-  return currentSock;
-}
-
 // ─── Anti‑Sleep / Keep‑Alive ──────────────────────────────
 setInterval(() => {
   if (sock) {
@@ -306,5 +297,3 @@ setInterval(() => {
     process.exit(0);
   }
 }, 60000);
-
-module.exports = { startBot, getSock };
