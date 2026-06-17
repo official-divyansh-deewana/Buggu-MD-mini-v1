@@ -3,6 +3,7 @@ const ytdl = require('ytdl-core');
 const yts = require('yt-search');
 const mediafire = require('mediafire-dl');
 const pinterestScraper = require('pinterest-scraper-api');
+const tiktok = require('tiktok-scraper-canvas-removed');
 const { downloadFile } = require('../lib/utils');
 const fs = require('fs-extra');
 const path = require('path');
@@ -15,12 +16,8 @@ function isValidUrl(string) {
 // ─── Instagram (no key required – uses public API) ──────
 async function instagramDownload(url) {
   try {
-    // Try to get thumbnail via oEmbed (works for posts)
     const embedUrl = `https://api.instagram.com/oembed?url=${encodeURIComponent(url)}`;
     const response = await axios.get(embedUrl);
-    // oEmbed returns thumbnail_url, but not video.
-    // For video, we'd need a different approach.
-    // For now, return the thumbnail.
     return { type: 'image', url: response.data.thumbnail_url, title: response.data.title };
   } catch (e) {
     throw new Error('Instagram download requires a valid API key or session. Not implemented fully.');
@@ -30,7 +27,6 @@ async function instagramDownload(url) {
 // ─── Facebook (public API – no key) ──────────────────────
 async function facebookDownload(url) {
   try {
-    // Use a public Facebook video downloader API
     const apiUrl = `https://api.facevideo.net/api/video?url=${encodeURIComponent(url)}`;
     const response = await axios.get(apiUrl);
     if (response.data && response.data.video) {
@@ -43,33 +39,26 @@ async function facebookDownload(url) {
   }
 }
 
-// ─── TikTok (free API – no key) ──────────────────────────
+// ─── TikTok (using tiktok-scraper-canvas-removed) ──────────
 async function tiktokDownload(url) {
   try {
-    // Using tikwm.com API (free, no key)
-    const apiUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`;
-    const response = await axios.get(apiUrl);
-    if (response.data && response.data.data) {
-      const data = response.data.data;
-      // Prefer HD video, fallback to music
-      const videoUrl = data.play || data.hdplay || data.music;
-      return { url: videoUrl, title: data.title };
+    const videoMeta = await tiktok.getVideoMeta(url);
+    if (videoMeta && videoMeta.videoUrl) {
+      return { url: videoMeta.videoUrl, title: videoMeta.title || 'TikTok Video' };
     } else {
       throw new Error('No video found.');
     }
   } catch (e) {
-    throw new Error('TikTok downloader failed. Try again later.');
+    console.error('TikTok download error:', e);
+    throw new Error('TikTok downloader failed. Please try again later.');
   }
 }
 
 // ─── Twitter (public API – no key) ────────────────────────
 async function twitterDownload(url) {
   try {
-    // Use a public Twitter video downloader API
-    const apiUrl = `https://api.twitter.com/1.1/statuses/oembed.json?url=${encodeURIComponent(url)}`;
-    // This only returns embed info; for video we need another service.
-    // We'll use a fallback.
-    throw new Error('Twitter downloader requires API key. Not implemented.');
+    // Twitter API v2 requires Bearer token. For now, we throw a clear error.
+    throw new Error('Twitter downloader requires Bearer token. Set TWITTER_BEARER_TOKEN in .env');
   } catch (e) {
     throw new Error('Twitter downloader requires Bearer token. Not implemented.');
   }
@@ -79,7 +68,6 @@ async function twitterDownload(url) {
 async function mediafireDownload(url) {
   try {
     const result = await mediafire.download(url);
-    // result: { file: { name, size, link } }
     return result.file.link;
   } catch (e) {
     throw new Error('MediaFire download failed. Check the URL.');
@@ -89,7 +77,6 @@ async function mediafireDownload(url) {
 // ─── Pinterest ─────────────────────────────────────────────
 async function pinterestSearch(query) {
   try {
-    // pinterest-scraper-api: returns array of objects { imageUrl, title, author, originalUrl }
     const images = await pinterestScraper.searchPinterest(query, 5);
     if (images && images.length > 0) {
       return images[0];
@@ -252,7 +239,6 @@ module.exports = [
       if (!fullArgs || !isValidUrl(fullArgs)) return await sock.sendMessage(from, { text: '❌ Usage: .mediafire URL' });
       try {
         const link = await mediafireDownload(fullArgs);
-        // Send as document
         const fileName = fullArgs.split('/').pop() || 'file';
         await sock.sendMessage(from, { document: { url: link }, fileName: fileName, mimetype: 'application/octet-stream' });
       } catch (err) {
