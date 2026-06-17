@@ -9,7 +9,7 @@
     "pair": "node pair/index.js"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "20.x"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "^6.7.22",
@@ -32,11 +32,17 @@
     "node-html-parser": "^6.1.5",
     "cron": "^3.1.6",
     "instagram-url-direct": "^1.0.0",
-    "tiktok-scraper": "^1.0.0",
+    "tiktok-scraper-canvas-removed": "^1.4.35",
     "twitter-api-v2": "^1.15.0",
     "pinterest-scraper-api": "^1.0.0",
     "mediafire-dl": "^1.0.0",
-    "g-i-s": "^1.0.0"
+    "g-i-s": "^1.0.0",
+    "canvas": "^3.0.0"
+  },
+  "overrides": {
+    "tiktok-scraper": {
+      "canvas": "$canvas"
+    }
   },
   "devDependencies": {
     "nodemon": "^3.0.0"
