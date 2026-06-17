@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// BUGGU‑MD — Complete WhatsApp Bot
+// BUGGU‑MD — Complete WhatsApp Bot (Stable)
 // ─────────────────────────────────────────────────────────────
 
 const { makeWASocket, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
@@ -13,7 +13,7 @@ const path = require('path');
 const moment = require('moment');
 require('dotenv').config();
 
-// ─── Express Server (Pair Website + Health) ────────────────
+// ─── Express Server ──────────────────────────────────────────
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -24,7 +24,7 @@ app.get('/health', (req, res) => res.send('OK'));
 app.get('/keep-alive', (req, res) => res.send('Alive'));
 
 const server = app.listen(config.pairPort || 3000, () => {
-  console.log(`🟢 Pair website & health server running on port ${config.pairPort || 3000}`);
+  console.log(`🟢 Server running on port ${config.pairPort || 3000}`);
 });
 
 // ─── Global Error Handlers ──────────────────────────────────
@@ -33,7 +33,7 @@ process.on('uncaughtException', (err) => {
   if (sock) sock.end();
 });
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error('❌ Unhandled Rejection:', reason);
 });
 
 // ─── MongoDB Connection ────────────────────────────────────
@@ -50,9 +50,9 @@ process.on('unhandledRejection', (reason, promise) => {
 // ─── Bot State ──────────────────────────────────────────────
 let sock = null;
 let isConnecting = false;
-let currentSock = null;
+let currentSock = null;  // Exported for pair route
 
-// ─── Spam Tracker ──────────────────────────────────────────
+// ─── Spam & Cooldown ──────────────────────────────────────
 const spamTracker = new Map();
 const cooldowns = new Map();
 
@@ -93,7 +93,7 @@ async function startBot() {
       browser: ['BUGGU-MD', 'Chrome', '120.0.0.0'],
       keepAliveIntervalMs: 60000,
     });
-    currentSock = sock;
+    currentSock = sock;  // Make available for pair route
 
     sock.ev.on('creds.update', saveCreds);
 
@@ -102,6 +102,7 @@ async function startBot() {
       const { connection, lastDisconnect, qr } = update;
       if (qr) {
         console.log('📱 Scan QR to connect (or use pair code)');
+        // Optionally broadcast QR to pair website? We'll not for simplicity.
       }
 
       if (connection === 'close') {
@@ -160,7 +161,7 @@ async function startBot() {
       else if (msg.message.imageMessage) text = msg.message.imageMessage.caption || '';
       else return;
 
-      // ─── Anti‑Link ──────────────────────────────────────────
+      // ─── Anti-Link ──────────────────────────────────────────
       if (isGroup) {
         const antilinkEnabled = await getSetting(`antilink_${from}`) || false;
         if (antilinkEnabled) {
@@ -173,7 +174,7 @@ async function startBot() {
         }
       }
 
-      // ─── Anti‑Spam ───────────────────────────────────────────
+      // ─── Anti-Spam ───────────────────────────────────────────
       if (isGroup) {
         const spamKey = `${from}_${senderJid}`;
         const now = Date.now();
