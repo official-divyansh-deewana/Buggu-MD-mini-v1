@@ -17,6 +17,7 @@
     .glass {
       background: rgba(255, 255, 255, 0.07);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-radius: 30px;
       border: 1px solid rgba(255, 255, 255, 0.15);
       padding: 40px 30px;
@@ -78,7 +79,7 @@
       border: 1px dashed rgba(255,215,0,0.4);
       display: none;
     }
-    .code-box .code { font-size: 2rem; font-weight: 700; color: #ffd700; letter-spacing: 4px; }
+    .code-box .code { font-size: 2rem; font-weight: 700; color: #ffd700; letter-spacing: 4px; word-break: break-all; }
     .code-box .copy-btn {
       background: rgba(255,215,0,0.2);
       border: none;
@@ -104,6 +105,8 @@
       vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .error-text { color: #f44336; margin-top: 10px; }
+    .success-text { color: #4caf50; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -126,7 +129,9 @@
     </div>
     <div class="status">
       <div>🟢 <span id="statusLabel" class="live">Live</span> · <span id="usersCount">0</span> users online</div>
-      <div class="status-text" id="statusMessage">Ready to pair</div>
+      <div id="statusMessage" class="status-text">Ready to pair</div>
+      <div id="errorMessage" class="error-text" style="display:none;"></div>
+      <div id="successMessage" class="success-text" style="display:none;"></div>
     </div>
     <div class="footer">
       © 2026 BUGGU-MD · <a href="#" target="_blank">Channel</a> · <a href="#" target="_blank">Group</a>
@@ -142,7 +147,10 @@
     const statusLabel = document.getElementById('statusLabel');
     const usersCount = document.getElementById('usersCount');
     const statusMessage = document.getElementById('statusMessage');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
 
+    // Fake online users
     setInterval(() => {
       usersCount.textContent = Math.floor(Math.random() * 20) + 1;
     }, 5000);
@@ -150,9 +158,11 @@
     pairBtn.addEventListener('click', async () => {
       const phone = phoneInput.value.trim();
       if (!phone) {
-        statusMessage.textContent = '❌ Please enter a phone number.';
+        showError('❌ Please enter a phone number.');
         return;
       }
+      // Hide any previous messages
+      hideMessages();
       pairBtn.disabled = true;
       pairBtn.innerHTML = '<span class="loader"></span> Generating...';
       statusMessage.textContent = '⏳ Generating pair code...';
@@ -163,21 +173,36 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone })
         });
+
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          // If not JSON, it's likely an HTML error page
+          const text = await response.text();
+          console.error('Server returned non-JSON:', text);
+          showError('❌ Server error: Received HTML instead of JSON. Check your server logs.');
+          statusMessage.textContent = '❌ Server error';
+          return;
+        }
+
         const data = await response.json();
         if (response.ok && data.code) {
           pairCode.textContent = data.code;
           codeContainer.style.display = 'block';
-          statusMessage.textContent = '✅ Pair code generated! Copy it and use in WhatsApp.';
+          showSuccess('✅ Pair code generated! Copy it and use in WhatsApp.');
+          statusMessage.textContent = '✅ Code ready';
           statusLabel.textContent = 'Live';
           statusLabel.className = 'live';
         } else {
-          statusMessage.textContent = '❌ ' + (data.error || 'Failed to generate code.');
+          showError('❌ ' + (data.error || 'Failed to generate code.'));
           if (data.fallback === 'qr') {
-            statusMessage.textContent = '⚠️ Bot not ready. Please scan QR code from logs.';
+            showError('⚠️ Bot not ready. Please scan QR code from logs.');
           }
         }
       } catch (err) {
-        statusMessage.textContent = '❌ Error: ' + err.message;
+        console.error('Fetch error:', err);
+        showError('❌ Network error: ' + err.message);
+        statusMessage.textContent = '❌ Error';
       } finally {
         pairBtn.disabled = false;
         pairBtn.innerHTML = '🔑 Generate Pair Code';
@@ -190,6 +215,7 @@
         navigator.clipboard.writeText(code).then(() => {
           alert('✅ Code copied!');
         }).catch(() => {
+          // Fallback
           const textArea = document.createElement('textarea');
           textArea.value = code;
           document.body.appendChild(textArea);
@@ -200,6 +226,23 @@
         });
       }
     });
+
+    function showError(msg) {
+      errorMessage.textContent = msg;
+      errorMessage.style.display = 'block';
+      successMessage.style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+      successMessage.textContent = msg;
+      successMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+    }
+
+    function hideMessages() {
+      errorMessage.style.display = 'none';
+      successMessage.style.display = 'none';
+    }
   </script>
 </body>
 </html>
