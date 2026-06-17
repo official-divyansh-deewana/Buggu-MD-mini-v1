@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────────────────────────
-// BUGGU‑MD — Complete WhatsApp Bot (Fully Updated)
+// BUGGU‑MD — Complete WhatsApp Bot
 // ─────────────────────────────────────────────────────────────
 
-const { makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
+const { makeWASocket, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const { MongoStore } = require('./lib/sessionStore');
 const database = require('./lib/database');
 const pluginHandler = require('./lib/pluginHandler');
@@ -10,17 +10,8 @@ const { generateMenu } = require('./lib/menu');
 const config = require('./config');
 const express = require('express');
 const path = require('path');
-const fs = require('fs-extra');
 const moment = require('moment');
 require('dotenv').config();
-
-// ─── Destructure models & helpers from database ─────────────
-const { models, getSetting, setSetting, updateStats } = database;
-const { Economy, Level, Poll } = models;
-
-// ─── Constants ──────────────────────────────────────────────
-const XP_PER_MSG = 10;
-const LEVEL_UP_BASE = 100;
 
 // ─── Express Server (Pair Website + Health) ────────────────
 const app = express();
@@ -59,10 +50,17 @@ process.on('unhandledRejection', (reason, promise) => {
 // ─── Bot State ──────────────────────────────────────────────
 let sock = null;
 let isConnecting = false;
-let currentSock = null; // For pair route
+let currentSock = null;
 
 // ─── Spam Tracker ──────────────────────────────────────────
 const spamTracker = new Map();
+const cooldowns = new Map();
+
+// ─── Constants ──────────────────────────────────────────────
+const XP_PER_MSG = 10;
+const LEVEL_UP_BASE = 100;
+const { models, getSetting, setSetting, updateStats } = database;
+const { Level } = models;
 
 // ─── Helper: Check Group Admin ─────────────────────────────
 async function isUserAdmin(sock, groupJid, userJid) {
@@ -86,12 +84,7 @@ async function startBot() {
 
     const store = new MongoStore(config.sessionName);
     await store.initialize();
-
     const { state, saveCreds } = await store.getState();
-
-    // ✅ SAFETY: Ensure creds and keys exist (prevent 'undefined' errors)
-    if (!state.creds) state.creds = {};
-    if (!state.keys) state.keys = {};
 
     sock = makeWASocket({
       version,
@@ -134,7 +127,7 @@ async function startBot() {
       }
     });
 
-    // ─── Group Participant Events (Welcome/Goodbye) ────────
+    // ─── Group Participant Events ──────────────────────────
     sock.ev.on('group-participants.update', async (update) => {
       const { id, participants, action } = update;
       for (const user of participants) {
@@ -290,9 +283,6 @@ async function startBot() {
   }
 }
 
-// ─── Cooldown Storage ──────────────────────────────────────
-const cooldowns = new Map();
-
 // ─── Start ──────────────────────────────────────────────────
 startBot();
 
@@ -317,5 +307,4 @@ setInterval(() => {
   }
 }, 60000);
 
-// ─── Exports ───────────────────────────────────────────────
 module.exports = { startBot, getSock };
