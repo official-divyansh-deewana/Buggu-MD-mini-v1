@@ -1,0 +1,133 @@
+{
+  "menu": {
+    "general": {
+      "commands": [
+        { "cmd": "menu", "desc": "Show main menu", "reaction": "📋" },
+        { "cmd": "help", "desc": "Alias for menu", "reaction": "📋" },
+        { "cmd": "ping", "desc": "Check bot latency", "reaction": "🏓" },
+        { "cmd": "alive", "desc": "Check if bot is alive", "reaction": "💚" },
+        { "cmd": "runtime", "desc": "Bot uptime", "reaction": "⏱️" },
+        { "cmd": "owner", "desc": "Owner info", "reaction": "👑" },
+        { "cmd": "repo", "desc": "Bot repository", "reaction": "📁" },
+        { "cmd": "script", "desc": "Bot script info", "reaction": "📜" },
+        { "cmd": "info", "desc": "Bot information", "reaction": "ℹ️" },
+        { "cmd": "system", "desc": "System status", "reaction": "🖥️" },
+        { "cmd": "rules", "desc": "Bot rules", "reaction": "📖" }
+      ]
+    },
+    "owner": {
+      "commands": [
+        { "cmd": "setvar", "desc": "Set environment variable", "reaction": "⚙️" },
+        { "cmd": "getvar", "desc": "Get environment variable", "reaction": "⚙️" },
+        { "cmd": "restart", "desc": "Restart bot", "reaction": "🔄" },
+        { "cmd": "shutdown", "desc": "Shutdown bot", "reaction": "⏹️" },
+        { "cmd": "eval", "desc": "Evaluate JavaScript", "reaction": "💻" },
+        { "cmd": "exec", "desc": "Execute shell command", "reaction": "💻" },
+        { "cmd": "broadcast", "desc": "Broadcast message", "reaction": "📢" },
+        { "cmd": "block", "desc": "Block user", "reaction": "🚫" },
+        { "cmd": "unblock", "desc": "Unblock user", "reaction": "✅" },
+        { "cmd": "ban", "desc": "Ban user", "reaction": "🔨" },
+        { "cmd": "unban", "desc": "Unban user", "reaction": "🔓" },
+        { "cmd": "setprefix", "desc": "Change bot prefix", "reaction": "🔣" },
+        { "cmd": "setmode", "desc": "Change bot mode (public/private)", "reaction": "🌐" },
+        { "cmd": "setpp", "desc": "Set profile picture", "reaction": "🖼️" },
+        { "cmd": "setname", "desc": "Set bot name", "reaction": "✏️" },
+        { "cmd": "setbio", "desc": "Set bot about", "reaction": "📝" }
+      ]
+    },
+    "group": {
+      "commands": [
+        { "cmd": "tagall", "desc": "Tag all group members", "reaction": "🏷️" },
+        { "cmd": "hidetag", "desc": "Tag all without mention", "reaction": "🙈" },
+        { "cmd": "kick", "desc": "Kick a member", "reaction": "👢" },
+        { "cmd": "add", "desc": "Add a member", "reaction": "➕" },
+        { "cmd": "promote", "desc": "Promote to admin", "reaction": "⬆️" },
+        { "cmd": "demote", "desc": "Demote admin", "reaction": "⬇️" },
+        { "cmd": "group open", "desc": "Open group (allow all)", "reaction": "🔓" },
+        { "cmd": "group close", "desc": "Close group (only admins)", "reaction": "🔒" },
+        { "cmd": "group settings", "desc": "View group settings", "reaction": "⚙️" },
+        { "cmd": "invite", "desc": "Get group invite link", "reaction": "🔗" },
+        { "cmd": "revoke", "desc": "Revoke invite link", "reaction": "🚫" },
+        { "cmd": "delete", "desc": "Delete a message", "reaction": "🗑️" },
+        { "cmd": "mute", "desc": "Mute group", "reaction": "🔇" },
+        { "cmd": "unmute", "desc": "Unmute group", "reaction": "🔊" }
+      ]
+    },
+    "download": {
+      "commands": [
+        { "cmd": "play", "desc": "Play audio from YouTube", "reaction": "🎵" },
+        { "cmd": "song", "desc": "Download song from YouTube", "reaction": "🎵" },
+        { "cmd": "video", "desc": "Download video from YouTube", "reaction": "🎬" },
+        { "cmd": "ytmp3", "desc": "YouTube to MP3", "reaction": "🎵" },
+        { "cmd": "ytmp4", "desc": "YouTube to MP4", "reaction": "🎬" },
+        { "cmd": "instagram", "desc": "Download Instagram media", "reaction": "📷" },
+        { "cmd": "facebook", "desc": "Download Facebook video", "reaction": "📘" },
+        { "cmd": "tiktok", "desc": "Download TikTok video", "reaction": "🎶" },
+        { "cmd": "twitter", "desc": "Download Twitter media", "reaction": "🐦" },
+        { "cmd": "mediafire", "desc": "Download from MediaFire", "reaction": "💾" },
+        { "cmd": "pinterest", "desc": "Download Pinterest image", "reaction": "📌" }
+      ]
+    },
+    "ai": {
+      "commands": [
+        { "cmd": "ai", "desc": "Ask AI (GPT)", "reaction": "🤖" },
+        { "cmd": "gpt", "desc": "Ask GPT", "reaction": "🧠" },
+        { "cmd": "bugguai", "desc": "BUGGU AI assistant", "reaction": "🤖" },
+        { "cmd": "ask", "desc": "Ask anything", "reaction": "❓" },
+        { "cmd": "imageai", "desc": "Generate image from text (DALL·E)", "reaction": "🖼️" },
+        { "cmd": "codeai", "desc": "Generate code", "reaction": "💻" },
+        { "cmd": "chat", "desc": "Chat with bot", "reaction": "💬" },
+        { "cmd": "translate", "desc": "Translate text", "reaction": "🌐" },
+        { "cmd": "explain", "desc": "Explain something", "reaction": "📚" }
+      ]
+    },
+    "fun": {
+      "commands": [
+        { "cmd": "joke", "desc": "Get a joke", "reaction": "😂" },
+        { "cmd": "quote", "desc": "Get a quote", "reaction": "💬" },
+        { "cmd": "fact", "desc": "Get a random fact", "reaction": "🧠" },
+        { "cmd": "truth", "desc": "Truth or dare: truth", "reaction": "🤫" },
+        { "cmd": "dare", "desc": "Truth or dare: dare", "reaction": "😈" },
+        { "cmd": "ship", "desc": "Ship two people", "reaction": "💞" },
+        { "cmd": "hack", "desc": "Fake hack", "reaction": "💻" },
+        { "cmd": "fakechat", "desc": "Fake chat", "reaction": "💬" },
+        { "cmd": "wanted", "desc": "Wanted poster", "reaction": "🔫" }
+      ]
+    },
+    "utility": {
+      "commands": [
+        { "cmd": "weather", "desc": "Get weather", "reaction": "☀️" },
+        { "cmd": "time", "desc": "Current time", "reaction": "🕐" },
+        { "cmd": "calculator", "desc": "Calculate expression", "reaction": "🧮" },
+        { "cmd": "qr", "desc": "Generate QR code", "reaction": "📱" },
+        { "cmd": "readmore", "desc": "Add read more separator", "reaction": "📄" },
+        { "cmd": "sticker", "desc": "Make sticker from image", "reaction": "🖼️" },
+        { "cmd": "take", "desc": "Take sticker with pack info", "reaction": "🖼️" },
+        { "cmd": "toimg", "desc": "Convert sticker to image", "reaction": "🔄" },
+        { "cmd": "tomp3", "desc": "Convert video to audio", "reaction": "🎵" },
+        { "cmd": "toptt", "desc": "Convert text to TTS", "reaction": "🔊" },
+        { "cmd": "tts", "desc": "Text to speech", "reaction": "🗣️" }
+      ]
+    },
+    "status": {
+      "commands": [
+        { "cmd": "statusview", "desc": "Auto view status (toggle)", "reaction": "👁️" },
+        { "cmd": "statuslike", "desc": "Auto like status (toggle)", "reaction": "❤️" },
+        { "cmd": "statusreply", "desc": "Auto reply status (toggle)", "reaction": "💬" }
+      ]
+    },
+    "newsletter": {
+      "commands": [
+        { "cmd": "newsletter", "desc": "Newsletter info", "reaction": "📰" },
+        { "cmd": "channel", "desc": "Channel info", "reaction": "📺" }
+      ]
+    },
+    "special": {
+      "commands": [
+        { "cmd": "pair", "desc": "Generate pair code", "reaction": "🔑" },
+        { "cmd": "setty", "desc": "Advanced settings menu", "reaction": "⚙️" },
+        { "cmd": "boom", "desc": "Boom command (repeat text)", "reaction": "💥" }
+      ]
+    }
+  }
+}
