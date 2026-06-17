@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// BUGGU‑MD — Complete WhatsApp Bot (Stable)
+// BUGGU‑MD — WhatsApp Bot (Stable)
 // ─────────────────────────────────────────────────────────────
 
 const { makeWASocket, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
@@ -50,7 +50,7 @@ process.on('unhandledRejection', (reason, promise) => {
 // ─── Bot State ──────────────────────────────────────────────
 let sock = null;
 let isConnecting = false;
-let currentSock = null;  // Exported for pair route
+let currentSock = null;
 
 // ─── Spam & Cooldown ──────────────────────────────────────
 const spamTracker = new Map();
@@ -93,7 +93,7 @@ async function startBot() {
       browser: ['BUGGU-MD', 'Chrome', '120.0.0.0'],
       keepAliveIntervalMs: 60000,
     });
-    currentSock = sock;  // Make available for pair route
+    currentSock = sock;
 
     sock.ev.on('creds.update', saveCreds);
 
@@ -102,7 +102,6 @@ async function startBot() {
       const { connection, lastDisconnect, qr } = update;
       if (qr) {
         console.log('📱 Scan QR to connect (or use pair code)');
-        // Optionally broadcast QR to pair website? We'll not for simplicity.
       }
 
       if (connection === 'close') {
