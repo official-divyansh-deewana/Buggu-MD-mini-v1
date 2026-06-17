@@ -1,7 +1,7 @@
 {
   "name": "buggu-md",
-  "version": "2.1.0",
-  "description": "BUGGU-MD - Advanced WhatsApp Bot with Baileys, MongoDB, and Plugin System",
+  "version": "2.2.0",
+  "description": "BUGGU-MD - Complete WhatsApp Bot with Pairing, Economy, Levels, Polls, and more",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -30,7 +30,13 @@
     "openai": "^4.20.0",
     "google-translate-api-x": "^1.0.0",
     "node-html-parser": "^6.1.5",
-    "cron": "^3.1.6"
+    "cron": "^3.1.6",
+    "instagram-url-direct": "^1.0.0",
+    "tiktok-scraper": "^1.0.0",
+    "twitter-api-v2": "^1.15.0",
+    "pinterest-scraper": "^1.0.0",
+    "mediafire-dl": "^1.0.0",
+    "g-i-s": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"
