@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// BUGGU‑MD — WhatsApp Bot (Stable)
+// BUGGU‑MD — Complete WhatsApp Bot (Stable)
 // ─────────────────────────────────────────────────────────────
 
 const { makeWASocket, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
