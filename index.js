@@ -1,9 +1,9 @@
 // ─────────────────────────────────────────────────────────────
-// BUGGU‑MD — WhatsApp Bot (QR on website)
+// BUGGU‑MD — WhatsApp Bot (QR on website, file-based session)
 // ─────────────────────────────────────────────────────────────
 
 const { makeWASocket, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
-const { MongoStore } = require('./lib/sessionStore');
+const { SimpleAuthStore } = require('./lib/sessionStore');
 const database = require('./lib/database');
 const pluginHandler = require('./lib/pluginHandler');
 const { generateMenu } = require('./lib/menu');
@@ -85,7 +85,7 @@ async function startBot() {
     const { version } = await fetchLatestBaileysVersion();
     console.log(`📡 Baileys version: ${version}`);
 
-    const store = new MongoStore(config.sessionName);
+    const store = new SimpleAuthStore(config.sessionName || 'buggu_session');
     await store.initialize();
     const { state, saveCreds } = await store.getState();
 
@@ -103,7 +103,6 @@ async function startBot() {
     sock.ev.on('connection.update', async (update) => {
       const { connection, lastDisconnect, qr } = update;
       
-      // Capture QR and convert to base64 for website
       if (qr) {
         console.log('📱 QR Code generated (also available on website)');
         try {
@@ -119,6 +118,12 @@ async function startBot() {
         const shouldReconnect = (statusCode !== DisconnectReason.loggedOut);
         console.log(`🔌 Connection closed (${statusCode}), reconnecting: ${shouldReconnect}`);
         if (shouldReconnect) {
+          // If we got a logged out or auth failure, we might want to reset session
+          if (statusCode === 401) {
+            console.log('⚠️ Auth failure – resetting session...');
+            await store.delete();
+            global.qrCodeData = null;
+          }
           isConnecting = false;
           setTimeout(startBot, 5000);
         } else {
