@@ -102,13 +102,15 @@ async function startBot() {
     // ─── Connection Update ──────────────────────────────────
     sock.ev.on('connection.update', async (update) => {
       const { connection, lastDisconnect, qr } = update;
+      
+      // Capture QR and convert to base64 for website
       if (qr) {
         console.log('📱 QR Code generated (also available on website)');
-        // Convert QR to base64 for website
         try {
           global.qrCodeData = await QRCode.toDataURL(qr);
+          console.log('✅ QR stored for website.');
         } catch (err) {
-          console.error('QR conversion error:', err);
+          console.error('❌ QR conversion error:', err);
         }
       }
 
