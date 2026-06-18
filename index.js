@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// BUGGU‑MD — Complete WhatsApp Bot (FINAL WORKING)
+// BUGGU‑MD — WhatsApp Bot (with QR on website)
 // ─────────────────────────────────────────────────────────────
 
 const { makeWASocket, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
@@ -11,17 +11,18 @@ const config = require('./config');
 const express = require('express');
 const path = require('path');
 const moment = require('moment');
+const QRCode = require('qrcode');
 require('dotenv').config();
+
+// ─── Store QR globally ──────────────────────────────────────
+global.qrCodeData = null;
 
 // ─── Express Server ──────────────────────────────────────────
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'uploads')));
-
-// ─── PAIR ROUTE ─────────────────────────────────────────────
-const pairRouter = require('./pair/index');
-app.use('/pair', pairRouter);
+app.use('/pair', require('./pair/index'));
 
 app.get('/health', (req, res) => res.send('OK'));
 app.get('/keep-alive', (req, res) => res.send('Alive'));
@@ -102,7 +103,9 @@ async function startBot() {
     sock.ev.on('connection.update', async (update) => {
       const { connection, lastDisconnect, qr } = update;
       if (qr) {
-        console.log('📱 Scan QR to connect (or use pair code)');
+        console.log('📱 QR Code generated (also available on website)');
+        // Convert QR to base64 for website
+        global.qrCodeData = await QRCode.toDataURL(qr);
       }
 
       if (connection === 'close') {
@@ -119,6 +122,7 @@ async function startBot() {
       } else if (connection === 'open') {
         console.log('✅ BUGGU-MD is online!');
         isConnecting = false;
+        global.qrCodeData = null; // Clear QR after connect
         await pluginHandler.loadAll(sock);
         await generateMenu(sock);
         const ownerJid = config.ownerNumber + '@s.whatsapp.net';
@@ -285,17 +289,17 @@ async function startBot() {
 // ─── Start ──────────────────────────────────────────────────
 startBot();
 
-// ─── EXPORT SOCK DIRECTLY ───────────────────────────────────
-module.exports.sock = sock;
+// ─── EXPORT SOCK AND QR DATA ───────────────────────────────
+module.exports = { sock: () => sock, getQR: () => global.qrCodeData };
 
-// ─── Anti‑Sleep / Keep‑Alive ──────────────────────────────
+// ─── Anti‑Sleep ──────────────────────────────────────────────
 setInterval(() => {
   if (sock) {
     sock.sendPresenceUpdate('available').catch(() => {});
   }
 }, 30000);
 
-// ─── Auto‑Restart on Memory High ──────────────────────────
+// ─── Auto‑Restart ──────────────────────────────────────────
 setInterval(() => {
   const used = process.memoryUsage().heapUsed / 1024 / 1024;
   if (used > 500) {
