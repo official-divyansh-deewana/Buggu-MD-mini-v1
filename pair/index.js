@@ -7,22 +7,37 @@ router.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'pair.html'));
 });
 
-// QR endpoint – always returns JSON
+// QR endpoint – returns JSON with QR data or error
 router.get('/qr', (req, res) => {
   try {
-    const qr = getQR();
-    if (qr) {
-      return res.json({ qr });
+    // Get QR from exported function
+    let qrData = null;
+    if (typeof getQR === 'function') {
+      qrData = getQR();
     } else {
-      return res.status(404).json({ error: 'QR not available. Bot may be already connected or starting.' });
+      // Fallback: read global directly
+      qrData = global.qrCodeData;
+    }
+
+    if (qrData) {
+      return res.json({ qr: qrData });
+    } else {
+      // QR not available – could be because bot is already connected or still starting
+      return res.status(404).json({ 
+        error: 'QR not available. Bot may be already connected or not yet ready.',
+        fallback: 'pair' // tell client to try pair code
+      });
     }
   } catch (err) {
-    console.error('QR error:', err);
-    return res.status(500).json({ error: 'Internal error generating QR.' });
+    console.error('❌ QR endpoint error:', err);
+    return res.status(500).json({ 
+      error: 'Internal error: ' + err.message,
+      fallback: 'pair'
+    });
   }
 });
 
-// Pair code endpoint
+// Pair code endpoint – generates 8-digit code
 router.post('/generate', async (req, res) => {
   const { phone } = req.body;
   if (!phone) {
@@ -45,7 +60,7 @@ router.post('/generate', async (req, res) => {
     const code = await currentSock.requestPairingCode(cleanPhone);
     res.json({ code });
   } catch (err) {
-    console.error('Pairing error:', err);
+    console.error('❌ Pairing error:', err);
     if (err.message && (err.message.includes('not authenticated') || err.message.includes('noiseKey'))) {
       return res.status(503).json({ 
         error: 'Bot not authenticated. Please scan QR code first.',
