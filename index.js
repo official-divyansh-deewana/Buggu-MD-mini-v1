@@ -54,6 +54,7 @@ process.on('unhandledRejection', (reason) => {
 // ─── Bot State ──────────────────────────────────────────────
 let sock = null;
 let isConnecting = false;
+let store = null;
 
 // ─── Spam & Cooldown ──────────────────────────────────────
 const spamTracker = new Map();
@@ -85,7 +86,7 @@ async function startBot() {
     const { version } = await fetchLatestBaileysVersion();
     console.log(`📡 Baileys version: ${version}`);
 
-    const store = new SimpleAuthStore(config.sessionName || 'buggu_session');
+    store = new SimpleAuthStore(config.sessionName || 'buggu_session');
     await store.initialize();
     const { state, saveCreds } = await store.getState();
 
@@ -118,10 +119,10 @@ async function startBot() {
         const shouldReconnect = (statusCode !== DisconnectReason.loggedOut);
         console.log(`🔌 Connection closed (${statusCode}), reconnecting: ${shouldReconnect}`);
         if (shouldReconnect) {
-          // If we got a logged out or auth failure, we might want to reset session
-          if (statusCode === 401) {
+          // If auth failure, reset session
+          if (statusCode === 401 || statusCode === 403) {
             console.log('⚠️ Auth failure – resetting session...');
-            await store.delete();
+            if (store) await store.delete();
             global.qrCodeData = null;
           }
           isConnecting = false;
@@ -301,7 +302,7 @@ async function startBot() {
 startBot();
 
 // ─── EXPORT SOCK AND QR DATA ───────────────────────────────
-module.exports = { sock: () => sock, getQR: () => global.qrCodeData };
+module.exports = { sock: () => sock, getQR: () => global.qrCodeData, resetSession: async () => { if (store) await store.delete(); global.qrCodeData = null; } };
 
 // ─── Anti‑Sleep ──────────────────────────────────────────────
 setInterval(() => {
