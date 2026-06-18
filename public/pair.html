@@ -68,6 +68,25 @@
       font-size: 0.9rem;
       margin-top: 5px;
     }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      width: 100%;
+    }
+    .btn-group .btn-sm {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    .btn-refresh { background: rgba(255,215,0,0.2); color: #ffd700; border: 1px solid #ffd700; }
+    .btn-refresh:hover { background: rgba(255,215,0,0.4); }
+    .btn-reset { background: rgba(244,67,54,0.2); color: #f44336; border: 1px solid #f44336; }
+    .btn-reset:hover { background: rgba(244,67,54,0.4); }
     .input-group { margin-bottom: 15px; }
     .input-group label { color: #ccc; font-size: 0.9rem; display: block; margin-bottom: 6px; }
     .input-group input {
@@ -136,17 +155,6 @@
       vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .refresh-btn {
-      background: none;
-      border: 1px solid #ffd700;
-      color: #ffd700;
-      padding: 5px 15px;
-      border-radius: 20px;
-      cursor: pointer;
-      margin-top: 5px;
-      font-size: 0.8rem;
-    }
-    .refresh-btn:hover { background: rgba(255,215,0,0.1); }
   </style>
 </head>
 <body>
@@ -164,7 +172,10 @@
     <div class="qr-container">
       <img id="qrImage" src="" alt="QR Code" style="display:none;">
       <div id="qrPlaceholder" class="qr-status">⏳ Loading QR Code...</div>
-      <button class="refresh-btn" id="refreshQR">⟳ Refresh QR</button>
+      <div class="btn-group">
+        <button class="btn-sm btn-refresh" id="refreshQR">⟳ Refresh</button>
+        <button class="btn-sm btn-reset" id="resetSession">🗑️ Reset Session</button>
+      </div>
     </div>
 
     <!-- Pair Code Section -->
@@ -194,6 +205,7 @@
     const qrImage = document.getElementById('qrImage');
     const qrPlaceholder = document.getElementById('qrPlaceholder');
     const refreshQRBtn = document.getElementById('refreshQR');
+    const resetBtn = document.getElementById('resetSession');
     const phoneInput = document.getElementById('phone');
     const pairBtn = document.getElementById('pairBtn');
     const codeContainer = document.getElementById('codeContainer');
@@ -234,8 +246,29 @@
 
     refreshQRBtn.addEventListener('click', loadQR);
     loadQR();
-    // Refresh every 10 seconds
     setInterval(loadQR, 10000);
+
+    // ─── Reset Session ──────────────────────────────────────
+    resetBtn.addEventListener('click', async () => {
+      if (!confirm('⚠️ This will delete the current session and restart the bot. Continue?')) return;
+      resetBtn.disabled = true;
+      resetBtn.textContent = '⏳ Resetting...';
+      try {
+        const res = await fetch('/pair/reset', { method: 'POST' });
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ Session reset! Bot will restart and generate new QR.');
+          location.reload();
+        } else {
+          alert('❌ Reset failed: ' + data.error);
+        }
+      } catch (err) {
+        alert('❌ Error: ' + err.message);
+      } finally {
+        resetBtn.disabled = false;
+        resetBtn.textContent = '🗑️ Reset Session';
+      }
+    });
 
     // ─── Fake online users ──────────────────────────────────
     setInterval(() => {
