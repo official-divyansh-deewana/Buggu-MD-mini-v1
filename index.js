@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// BUGGU‑MD — WhatsApp Bot (QR on website, file-based session)
+// BUGGU‑MD — WhatsApp Bot (QR on global, file-based session)
 // ─────────────────────────────────────────────────────────────
 
 const { makeWASocket, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
@@ -77,6 +77,15 @@ async function isUserAdmin(sock, groupJid, userJid) {
   }
 }
 
+// ─── Reset Session Function ────────────────────────────────
+async function resetSession() {
+  if (store) await store.delete();
+  global.qrCodeData = null;
+  if (sock) sock.end();
+  console.log('🔄 Session reset, restarting...');
+  setTimeout(() => process.exit(0), 1000);
+}
+
 // ─── Start Bot ─────────────────────────────────────────────
 async function startBot() {
   if (isConnecting) return;
@@ -119,11 +128,9 @@ async function startBot() {
         const shouldReconnect = (statusCode !== DisconnectReason.loggedOut);
         console.log(`🔌 Connection closed (${statusCode}), reconnecting: ${shouldReconnect}`);
         if (shouldReconnect) {
-          // If auth failure, reset session
           if (statusCode === 401 || statusCode === 403) {
             console.log('⚠️ Auth failure – resetting session...');
-            if (store) await store.delete();
-            global.qrCodeData = null;
+            await resetSession();
           }
           isConnecting = false;
           setTimeout(startBot, 5000);
@@ -301,8 +308,8 @@ async function startBot() {
 // ─── Start ──────────────────────────────────────────────────
 startBot();
 
-// ─── EXPORT SOCK AND QR DATA ───────────────────────────────
-module.exports = { sock: () => sock, getQR: () => global.qrCodeData, resetSession: async () => { if (store) await store.delete(); global.qrCodeData = null; } };
+// ─── EXPORT SOCK (for pair) and resetSession ──────────────
+module.exports = { sock: () => sock, resetSession };
 
 // ─── Anti‑Sleep ──────────────────────────────────────────────
 setInterval(() => {
