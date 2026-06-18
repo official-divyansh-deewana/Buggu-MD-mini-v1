@@ -17,17 +17,16 @@
     .glass {
       background: rgba(255, 255, 255, 0.07);
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       border-radius: 30px;
       border: 1px solid rgba(255, 255, 255, 0.15);
       padding: 40px 30px;
-      max-width: 500px;
+      max-width: 550px;
       width: 100%;
       box-shadow: 0 25px 50px rgba(0,0,0,0.5);
       animation: fadeIn 1s ease;
     }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-    .brand { text-align: center; margin-bottom: 30px; }
+    .brand { text-align: center; margin-bottom: 20px; }
     .brand h1 { font-size: 2.5rem; font-weight: 700; background: linear-gradient(45deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .brand p { color: #aaa; font-size: 0.9rem; margin-top: 5px; }
     .owner {
@@ -40,7 +39,36 @@
       color: #ffd700;
       font-size: 0.9rem;
     }
-    .input-group { margin-bottom: 20px; }
+    .section-title {
+      color: #fff;
+      font-weight: 600;
+      margin: 20px 0 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 8px;
+    }
+    .qr-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(0,0,0,0.3);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    #qrImage {
+      max-width: 200px;
+      height: auto;
+      border-radius: 10px;
+      background: white;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    .qr-status {
+      color: #aaa;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+    .input-group { margin-bottom: 15px; }
     .input-group label { color: #ccc; font-size: 0.9rem; display: block; margin-bottom: 6px; }
     .input-group input {
       width: 100%;
@@ -66,15 +94,15 @@
       cursor: pointer;
       transition: 0.3s;
       letter-spacing: 1px;
+      margin-top: 5px;
     }
     .btn:hover { transform: scale(1.02); box-shadow: 0 8px 20px rgba(255,215,0,0.3); }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-    .status { margin-top: 20px; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 15px; text-align: center; color: #aaa; font-size: 0.9rem; }
     .code-box {
       background: rgba(0,0,0,0.4);
       border-radius: 20px;
       padding: 15px;
-      margin: 20px 0;
+      margin: 15px 0;
       text-align: center;
       border: 1px dashed rgba(255,215,0,0.4);
       display: none;
@@ -91,6 +119,9 @@
       transition: 0.3s;
     }
     .code-box .copy-btn:hover { background: rgba(255,215,0,0.4); }
+    .status { margin-top: 20px; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 15px; text-align: center; color: #aaa; font-size: 0.9rem; }
+    .error-text { color: #f44336; margin-top: 10px; }
+    .success-text { color: #4caf50; margin-top: 10px; }
     .footer { margin-top: 25px; text-align: center; color: #555; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
     .footer a { color: #ffd700; text-decoration: none; }
     .loader {
@@ -105,8 +136,17 @@
       vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .error-text { color: #f44336; margin-top: 10px; }
-    .success-text { color: #4caf50; margin-top: 10px; }
+    .refresh-btn {
+      background: none;
+      border: 1px solid #ffd700;
+      color: #ffd700;
+      padding: 5px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      margin-top: 5px;
+      font-size: 0.8rem;
+    }
+    .refresh-btn:hover { background: rgba(255,215,0,0.1); }
   </style>
 </head>
 <body>
@@ -118,6 +158,17 @@
     <div class="owner">
       👑 Owner: 𓆩〭〬🐣⃪⃮⃔⃝꯭꯭〬ꯦ꯭꯭Ꭷɣ֯֯፝֟͠ɛ 𝐁սԍ͢ԍ𝛖
     </div>
+
+    <!-- QR Code Section -->
+    <div class="section-title">📲 Scan QR Code (First Time)</div>
+    <div class="qr-container">
+      <img id="qrImage" src="" alt="QR Code" style="display:none;">
+      <div id="qrPlaceholder" class="qr-status">⏳ Loading QR Code...</div>
+      <button class="refresh-btn" id="refreshQR">⟳ Refresh QR</button>
+    </div>
+
+    <!-- Pair Code Section -->
+    <div class="section-title">🔑 Get 8-Digit Pair Code</div>
     <div class="input-group">
       <label>📱 WhatsApp Number (with country code)</label>
       <input type="tel" id="phone" placeholder="e.g., 918882829982" value="918882829982">
@@ -127,9 +178,10 @@
       <div class="code" id="pairCode">------</div>
       <button class="copy-btn" id="copyBtn">📋 Copy Code</button>
     </div>
+
     <div class="status">
       <div>🟢 <span id="statusLabel" class="live">Live</span> · <span id="usersCount">0</span> users online</div>
-      <div id="statusMessage" class="status-text">Ready to pair</div>
+      <div id="statusMessage" class="status-text">Ready</div>
       <div id="errorMessage" class="error-text" style="display:none;"></div>
       <div id="successMessage" class="success-text" style="display:none;"></div>
     </div>
@@ -139,6 +191,9 @@
   </div>
 
   <script>
+    const qrImage = document.getElementById('qrImage');
+    const qrPlaceholder = document.getElementById('qrPlaceholder');
+    const refreshQRBtn = document.getElementById('refreshQR');
     const phoneInput = document.getElementById('phone');
     const pairBtn = document.getElementById('pairBtn');
     const codeContainer = document.getElementById('codeContainer');
@@ -150,18 +205,45 @@
     const errorMessage = document.getElementById('errorMessage');
     const successMessage = document.getElementById('successMessage');
 
-    // Fake online users
+    // ─── Load QR ──────────────────────────────────────────────
+    async function loadQR() {
+      try {
+        const res = await fetch('/pair/qr');
+        const data = await res.json();
+        if (res.ok && data.qr) {
+          qrImage.src = data.qr;
+          qrImage.style.display = 'block';
+          qrPlaceholder.textContent = '✅ QR ready! Scan with WhatsApp.';
+          qrPlaceholder.style.color = '#4caf50';
+        } else {
+          qrImage.style.display = 'none';
+          qrPlaceholder.textContent = '⚠️ ' + (data.error || 'No QR available. Bot may be already connected.');
+          qrPlaceholder.style.color = '#f44336';
+        }
+      } catch (err) {
+        qrImage.style.display = 'none';
+        qrPlaceholder.textContent = '❌ Error loading QR: ' + err.message;
+        qrPlaceholder.style.color = '#f44336';
+      }
+    }
+
+    refreshQRBtn.addEventListener('click', loadQR);
+    loadQR();
+    // Refresh every 10 seconds
+    setInterval(loadQR, 10000);
+
+    // ─── Fake online users ──────────────────────────────────
     setInterval(() => {
       usersCount.textContent = Math.floor(Math.random() * 20) + 1;
     }, 5000);
 
+    // ─── Generate Pair Code ──────────────────────────────────
     pairBtn.addEventListener('click', async () => {
       const phone = phoneInput.value.trim();
       if (!phone) {
         showError('❌ Please enter a phone number.');
         return;
       }
-      // Hide any previous messages
       hideMessages();
       pairBtn.disabled = true;
       pairBtn.innerHTML = '<span class="loader"></span> Generating...';
@@ -174,35 +256,22 @@
           body: JSON.stringify({ phone })
         });
 
-        // Check if response is JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          // If not JSON, it's likely an HTML error page
-          const text = await response.text();
-          console.error('Server returned non-JSON:', text);
-          showError('❌ Server error: Received HTML instead of JSON. Check your server logs.');
-          statusMessage.textContent = '❌ Server error';
-          return;
-        }
-
         const data = await response.json();
         if (response.ok && data.code) {
           pairCode.textContent = data.code;
           codeContainer.style.display = 'block';
-          showSuccess('✅ Pair code generated! Copy it and use in WhatsApp.');
+          showSuccess('✅ Pair code generated!');
           statusMessage.textContent = '✅ Code ready';
           statusLabel.textContent = 'Live';
           statusLabel.className = 'live';
         } else {
           showError('❌ ' + (data.error || 'Failed to generate code.'));
           if (data.fallback === 'qr') {
-            showError('⚠️ Bot not ready. Please scan QR code from logs.');
+            showError('⚠️ Please scan QR code first (see above).');
           }
         }
       } catch (err) {
-        console.error('Fetch error:', err);
         showError('❌ Network error: ' + err.message);
-        statusMessage.textContent = '❌ Error';
       } finally {
         pairBtn.disabled = false;
         pairBtn.innerHTML = '🔑 Generate Pair Code';
@@ -215,7 +284,6 @@
         navigator.clipboard.writeText(code).then(() => {
           alert('✅ Code copied!');
         }).catch(() => {
-          // Fallback
           const textArea = document.createElement('textarea');
           textArea.value = code;
           document.body.appendChild(textArea);
