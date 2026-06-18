@@ -217,8 +217,13 @@
           qrPlaceholder.style.color = '#4caf50';
         } else {
           qrImage.style.display = 'none';
-          qrPlaceholder.textContent = '⚠️ ' + (data.error || 'No QR available. Bot may be already connected.');
-          qrPlaceholder.style.color = '#f44336';
+          if (data.fallback === 'pair') {
+            qrPlaceholder.textContent = 'ℹ️ QR not needed – you can use Pair Code below.';
+            qrPlaceholder.style.color = '#ffd700';
+          } else {
+            qrPlaceholder.textContent = '⚠️ ' + (data.error || 'No QR available.');
+            qrPlaceholder.style.color = '#f44336';
+          }
         }
       } catch (err) {
         qrImage.style.display = 'none';
