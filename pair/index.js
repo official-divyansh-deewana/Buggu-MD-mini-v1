@@ -1,16 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const { sock, getQR, resetSession } = require('../index');
+const { sock, resetSession } = require('../index');
 
 router.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'pair.html'));
 });
 
-// QR endpoint
+// QR endpoint – reads from global
 router.get('/qr', (req, res) => {
   try {
-    const qr = getQR();
+    const qr = global.qrCodeData;
     if (qr) {
       return res.json({ qr });
     } else {
