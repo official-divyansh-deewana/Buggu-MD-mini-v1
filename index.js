@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// BUGGU‑MD — WhatsApp Bot (with QR on website)
+// BUGGU‑MD — WhatsApp Bot (QR on website)
 // ─────────────────────────────────────────────────────────────
 
 const { makeWASocket, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
@@ -105,7 +105,11 @@ async function startBot() {
       if (qr) {
         console.log('📱 QR Code generated (also available on website)');
         // Convert QR to base64 for website
-        global.qrCodeData = await QRCode.toDataURL(qr);
+        try {
+          global.qrCodeData = await QRCode.toDataURL(qr);
+        } catch (err) {
+          console.error('QR conversion error:', err);
+        }
       }
 
       if (connection === 'close') {
