@@ -7,16 +7,22 @@ router.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'pair.html'));
 });
 
-// Endpoint to get QR code image (base64)
+// QR endpoint – always returns JSON
 router.get('/qr', (req, res) => {
-  const qr = getQR();
-  if (!qr) {
-    return res.status(404).json({ error: 'QR not available. Bot may be already connected or starting.' });
+  try {
+    const qr = getQR();
+    if (qr) {
+      return res.json({ qr });
+    } else {
+      return res.status(404).json({ error: 'QR not available. Bot may be already connected or starting.' });
+    }
+  } catch (err) {
+    console.error('QR error:', err);
+    return res.status(500).json({ error: 'Internal error generating QR.' });
   }
-  res.json({ qr });
 });
 
-// Endpoint to generate pair code
+// Pair code endpoint
 router.post('/generate', async (req, res) => {
   const { phone } = req.body;
   if (!phone) {
